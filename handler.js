@@ -7,11 +7,20 @@ const libphonenumber = require('libphonenumber-js');
 
 Validator.register(
   'phone',
-  value => {
-    return libphonenumber.isValidNumber(value);
-  },
-  'The phone number has incorrect format'
+  value => libphonenumber.isValidNumber(value),
+  'The :attribute has incorrect format'
 );
+
+Validator.register(
+  'letters',
+  value => /^[a-zA-Z\s]*$/.test(value),
+  'The :attribute has incorrect format'
+);
+
+const headers = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Credentials': true,
+};
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
@@ -28,15 +37,20 @@ module.exports.createUser = (event, context, callback) => {
   const data = JSON.parse(event.body);
 
   const validation = new Validator(data, {
-    name: 'required|string',
-    surname: 'required|string',
+    name: 'required|letters',
+    surname: 'required|letters',
     phone: 'required|phone'
   });
 
   if (validation.fails()) {
+    let errors = validation.errors.all();
+    Object.keys(errors).forEach(attr => {
+      errors[attr] = validation.errors.first(attr);
+    });
     callback(null, {
       statusCode: 422,
-      body: JSON.stringify(validation.errors.all())
+      headers,
+      body: JSON.stringify({errors})
     });
     return;
   }
@@ -58,13 +72,15 @@ module.exports.createUser = (event, context, callback) => {
       console.error(error);
       callback(null, {
         statusCode: error.statusCode || 501,
-        body: JSON.stringify({message: "Couldn't create user."})
+        headers,
+        body: JSON.stringify({error: 'Couldn\'t create user.'})
       });
       return;
     }
 
     const response = {
       statusCode: 200,
+      headers,
       body: JSON.stringify(formatUser(params.Item))
     };
     callback(null, response);
@@ -81,14 +97,14 @@ module.exports.listUsers = (event, context, callback) => {
       console.error(error);
       callback(null, {
         statusCode: error.statusCode || 501,
-        body: JSON.stringify({message: "Couldn't fetch user."})
+        body: JSON.stringify({error: 'Couldn\'t fetch user.'})
       });
       return;
     }
 
-    // create a response
     const response = {
       statusCode: 200,
+      headers,
       body: JSON.stringify(result.Items.map(formatUser))
     };
     callback(null, response);
