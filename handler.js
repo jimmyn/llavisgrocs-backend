@@ -1,6 +1,6 @@
 'use strict';
 
-const uuid = require('uuid');
+const md5 = require('md5');
 const AWS = require('aws-sdk');
 const Validator = require('validatorjs');
 const libphonenumber = require('libphonenumber-js');
@@ -29,6 +29,7 @@ const formatUser = user => ({
   name: user.name,
   surname: user.surname.charAt(0),
   phone: user.phone.substr(user.phone.length - 4),
+  assignedTask: user.assignedTask,
   createdAt: user.createdAt
 });
 
@@ -58,7 +59,7 @@ module.exports.createUser = (event, context, callback) => {
   const params = {
     TableName: process.env.DYNAMODB_TABLE,
     Item: {
-      id: uuid.v1(),
+      id: md5(data.phone),
       name: data.name,
       surname: data.surname,
       phone: data.phone,
