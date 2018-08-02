@@ -102,10 +102,12 @@ module.exports.listUsers = (event, context, callback) => {
       return;
     }
 
+    const body = result.Items.map(formatUser).sort((x, y) => y.createdAt - x.createdAt);
+
     const response = {
       statusCode: 200,
       headers,
-      body: JSON.stringify(result.Items.map(formatUser))
+      body: JSON.stringify(body)
     };
     callback(null, response);
   });
