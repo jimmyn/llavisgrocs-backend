@@ -8,14 +8,12 @@ const libphonenumber = require('libphonenumber-js');
 Validator.register(
   'phone',
   value => libphonenumber.isValidNumber(value),
-  'The :attribute has incorrect format'
+  'un formato incorrecto'
 );
 
-Validator.register(
-  'letters',
-  value => /^[a-zA-Z\s]*$/.test(value),
-  'The :attribute has incorrect format'
-);
+const messages = Validator.getMessages('en');
+messages.required = 'es requerido';
+Validator.setMessages('en', messages);
 
 const headers = {
   'Access-Control-Allow-Origin': '*',
@@ -38,8 +36,8 @@ module.exports.createUser = (event, context, callback) => {
   const data = JSON.parse(event.body);
 
   const validation = new Validator(data, {
-    name: 'required|letters',
-    surname: 'required|letters',
+    name: 'required',
+    surname: 'required',
     phone: 'required|phone'
   });
 
