@@ -33,10 +33,11 @@ functions:
 
 resources:
   Resources:
-    TodosDynamoDbTable:
-      Type: 'AWS::DynamoDB::Table'
+    UsersDynamoDbTable:
+      Type: AWS::DynamoDB::Table
       DeletionPolicy: Retain
       Properties:
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
         AttributeDefinitions:
         - AttributeName: id
           AttributeType: S
@@ -46,4 +47,3 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
-        TableName: ${self:provider.environment.DYNAMODB_TABLE}
