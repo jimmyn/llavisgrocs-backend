@@ -8,11 +8,11 @@ const libphonenumber = require('libphonenumber-js');
 Validator.register(
   'phone',
   value => libphonenumber.isValidNumber(value),
-  'un formato incorrecto'
+  'format incorrecte'
 );
 
 const messages = Validator.getMessages('en');
-messages.required = 'es requerido';
+messages.required = 'és obligatori';
 Validator.setMessages('en', messages);
 
 const headers = {
